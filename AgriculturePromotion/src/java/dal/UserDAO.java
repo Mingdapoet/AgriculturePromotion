@@ -19,14 +19,37 @@ public class UserDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return new User(
-                    rs.getInt("id"),
-                    rs.getString("email"),
-                    rs.getString("role"),
-                    rs.getString("phone"),
-                    rs.getString("address"),
-                    rs.getDate("birthday"),
-                    rs.getTimestamp("created_at")
+                        rs.getInt("id"),
+                        rs.getString("email"),
+                        rs.getString("role"),
+                        rs.getString("phone"),
+                        rs.getString("address"),
+                        rs.getDate("birthday"),
+                        rs.getTimestamp("created_at")
                 );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public User getUserByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new User(
+                            rs.getInt("id"),
+                            rs.getString("email"),
+                            rs.getString("role"),
+                            rs.getString("phone"),
+                            rs.getString("address"),
+                            rs.getDate("birthday"),
+                            rs.getTimestamp("created_at")
+                    );
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -49,4 +72,20 @@ public class UserDAO {
         }
         return false;
     }
+
+    public boolean updateUserProfile(User user) {
+        String sql = "UPDATE users SET phone = ?, address = ?, birthday = ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, user.getPhone());
+            ps.setString(2, user.getAddress());
+            ps.setDate(3, user.getBirthday());
+            ps.setInt(4, user.getId());
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }
